@@ -1,400 +1,231 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DSQDS - 全生命周期自然资源多维安全量化与动态分级体系</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <style>
-        .sidebar {
-            height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            position: fixed;
-            width: 250px;
-            overflow-y: auto;
-        }
-        
-        .main-content {
-            margin-left: 250px;
-            padding: 20px;
-            background-color: #f8f9fa;
-            min-height: 100vh;
-        }
-        
-        .nav-link {
-            color: rgba(255,255,255,0.8) !important;
-            transition: all 0.3s ease;
-        }
-        
-        .nav-link:hover, .nav-link.active {
-            color: white !important;
-            background-color: rgba(255,255,255,0.1);
-            border-radius: 8px;
-        }
-        
-        .card {
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        
-        .card-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 12px 12px 0 0 !important;
-            border: none;
-        }
-        
-        .security-level {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.85em;
-            font-weight: 600;
-        }
-        
-        .level-核心数据 { background-color: #dc3545; color: white; }
-        .level-重要数据 { background-color: #fd7e14; color: white; }
-        .level-一般数据 { background-color: #ffc107; color: black; }
-        .level-公开数据 { background-color: #198754; color: white; }
-        
-        .metric-card {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .metric-value {
-            font-size: 2em;
-            font-weight: bold;
-            color: #667eea;
-        }
-        
-        .metric-label {
-            color: #6c757d;
-            font-size: 0.9em;
-        }
-        
-        .progress-ring {
-            transform: rotate(-90deg);
-        }
-        
-        .progress-ring-circle {
-            stroke-dasharray: 251.2;
-            stroke-dashoffset: 0;
-            transition: stroke-dashoffset 0.5s ease-in-out;
-        }
-        
-        .range-input {
-            width: 100%;
-            margin: 10px 0;
-        }
-        
-        .content-section {
-            display: none;
-        }
-        
-        .content-section.active {
-            display: block;
-        }
-        
-        .threat-item {
-            border-left: 4px solid #dc3545;
-            padding: 15px;
-            margin: 10px 0;
-            background-color: #f8f9fa;
-            border-radius: 0 8px 8px 0;
-        }
-        
-        .rule-item {
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 10px 0;
-            background-color: white;
-        }
-        
-        .stage-badge {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.8em;
-            margin-right: 5px;
-        }
-        
-        .stage-采集 { background-color: #e3f2fd; color: #1976d2; }
-        .stage-传输 { background-color: #f3e5f5; color: #7b1fa2; }
-        .stage-存储 { background-color: #e8f5e8; color: #388e3c; }
-        .stage-共享 { background-color: #fff3e0; color: #f57c00; }
-        .stage-应用 { background-color: #fce4ec; color: #c2185b; }
-        
-        .loading {
-            opacity: 0.6;
-            pointer-events: none;
-        }
-    </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DSQDS · 全生命周期自然资源多维安全量化与动态分级体系</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#f5f7fb; --panel:#fff; --line:#e9edf3; --text:#0f172a; --muted:#64748b;
+  --radius:16px; --shadow:0 10px 24px rgba(16,24,40,.08);
+  --grad1:#4a6cf7; --grad2:#8b5cf6; --primary:#5b7cff; --green:#16a34a; --danger:#ef4444; --warn:#f59e0b;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif}
+.app{display:flex;min-height:100vh}
+
+/* 侧栏 */
+.side{width:260px;background:linear-gradient(180deg,var(--grad1),var(--grad2));color:#e9edff;padding:18px 14px 22px;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.brand .logo{width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg,#34d399,#4f46e5)}
+.brand b{font-size:18px}
+.sub{color:#dbe3ff;font-size:12px;line-height:1.4;margin:8px 2px 18px}
+.nav a{display:flex;align-items:center;gap:10px;color:#f1f5ff;text-decoration:none;padding:10px 12px;border-radius:12px;margin:2px 0;cursor:pointer}
+.nav a:hover{background:rgba(255,255,255,.12)}
+.nav a.active{background:rgba(255,255,255,.24)}
+.ico{width:10px;height:10px;border-radius:50%;background:#c7d2fe}
+
+/* 主区域 */
+.main{flex:1;padding:20px 24px 28px;overflow:auto}
+.header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.header h1{margin:0;font-size:26px}
+.actions{margin-left:auto;display:flex;gap:10px}
+.btn{border:1px solid #cfd8e3;background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer}
+.btn.primary{background:var(--primary);color:#fff;border-color:transparent}
+.btn.danger{background:#fff;color:#ef4444;border-color:#fecaca}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:12px 0 8px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+.card h4{margin:0 0 8px 0;font-size:13px;color:#475569}
+.kpi{font-size:30px;font-weight:800;color:#5b6ee5}
+.kpi.green{color:var(--green)}
+.subkpi{color:#8a99af;font-size:12px}
+
+.grid{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;margin-top:10px}
+.grid2{display:grid;grid-template-columns:1.1fr 1fr;gap:16px;margin-top:16px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.ph{padding:10px 14px;color:#fff;background:linear-gradient(90deg,#6474ff,#8b5cf6);display:flex;align-items:center;gap:8px}
+.ph .dot{width:10px;height:10px;border-radius:50%;background:#c7d2fe}
+.pb{padding:14px 16px}
+
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;color:#64748b;font-size:12px}
+.legend span i{display:inline-block;width:10px;height:10px;margin-right:6px;border-radius:50%}
+
+.badge{display:inline-block;padding:3px 8px;border-radius:999px;font-size:12px;border:1px solid #e5e7eb;background:#f2f4fb;color:#334155;white-space:nowrap}
+.badge.green{border-color:#bbf7d0;background:#f0fdf4;color:#166534}
+.badge.orange{border-color:#fed7aa;background:#fff7ed;color:#9a3412}
+.badge.blue{border-color:#bfdbfe;background:#eff6ff;color:#1d4ed8}
+.badge.red{border-color:#fecaca;background:#fff1f2;color:#b91c1c}
+.badge.gray{color:#475569}
+
+.table{width:100%;border-collapse:separate;border-spacing:0 10px}
+.table th{padding:10px 12px;color:#6b7280;font-size:12px;text-align:left}
+.table td{background:#fff;border:1px solid var(--line);border-left:none;border-right:none;padding:12px;vertical-align:middle}
+.table tr{box-shadow:var(--shadow)}
+.table td:first-child{border-left:1px solid var(--line);border-top-left-radius:12px;border-bottom-left-radius:12px}
+.table td:last-child{border-right:1px solid var(--line);border-top-right-radius:12px;border-bottom-right-radius:12px}
+.progress{height:10px;background:#eef2ff;border-radius:999px;overflow:hidden}
+.progress .bar{height:100%;background:linear-gradient(90deg,#5b7cff,#7c9dff)}
+.right{text-align:right}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px}
+
+/* 弹窗 */
+.mask{position:fixed;inset:0;background:rgba(15,23,42,.38);display:none;align-items:center;justify-content:center;z-index:50}
+.dialog{width:640px;max-width:92vw;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+.dialog .hd{padding:14px 16px;border-bottom:1px solid var(--line);font-weight:700}
+.dialog .bd{padding:14px 16px}
+.form{display:grid;grid-template-columns:140px 1fr;gap:12px;align-items:center}
+.form label{color:#475569}
+.form input,.form select,.form textarea{width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:10px;background:#fff}
+.form textarea{min-height:96px;resize:vertical}
+
+/* 事件列表 */
+.events{max-height:360px;overflow:auto;padding:8px 12px}
+.evt{padding:12px 0;border-bottom:1px dashed #e5eaf2}
+.evt:last-child{border-bottom:none}
+.time{color:#94a3b8;font-size:12px;margin-bottom:6px}
+.evt b{display:block;margin-bottom:2px}
+.evt p{margin:0;color:#475569;font-size:13px}
+
+.toast{position:fixed;right:16px;bottom:16px;background:#111827;color:#fff;padding:10px 12px;border-radius:8px;opacity:0;transform:translateY(8px);transition:all .25s;z-index:80}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* 响应式 */
+@media (max-width:1200px){ .grid,.grid2{grid-template-columns:1fr} .cards{grid-template-columns:repeat(2,1fr)} .side{width:220px} }
+@media (max-width:860px){ .side{display:none} .cards{grid-template-columns:1fr} .form{grid-template-columns:1fr} }
+</style>
 </head>
 <body>
-    <!-- 侧边栏 -->
-    <div class="sidebar">
-        <div class="p-3">
-            <h4 class="mb-3"><i class="fas fa-shield-alt me-2"></i>DSQDS</h4>
-            <p class="small opacity-75">全生命周期自然资源多维安全量化与动态分级体系</p>
+<div class="app">
+  <!-- 侧栏 -->
+  <aside class="side">
+    <div class="brand"><div class="logo"></div><b>DSQDS</b></div>
+    <div class="sub">全生命周期自然资源多维安全量化<br>与动态分级体系</div>
+    <nav class="nav">
+      <a class="active" data-route="dashboard"><span class="ico"></span> 仪表板</a>
+      <a data-route="objects"><span class="ico"></span> 数据对象管理</a>
+      <a data-route="threats"><span class="ico"></span> 威胁清单</a>
+      <a data-route="weights"><span class="ico"></span> 权重配置</a>
+      <a data-route="rules"><span class="ico"></span> 安全规则</a>
+      <a data-route="events"><span class="ico"></span> 安全事件</a>
+      <a data-route="batch"><span class="ico"></span> 批量评估</a>
+    </nav>
+  </aside>
+
+  <!-- 主体 -->
+  <main class="main">
+    <!-- 仪表板 -->
+    <section id="view-dashboard" class="view">
+      <div class="header"><span style="font-size:22px">🛡</span><h1>系统仪表板</h1>
+        <div class="actions"><button class="btn" id="btn-refresh">🔄 刷新</button></div>
+      </div>
+      <section class="cards">
+        <div class="card"><h4>数据对象总数</h4><div class="kpi" id="kpi-obj">0</div></div>
+        <div class="card"><h4>威胁总数</h4><div class="kpi" id="kpi-threats">0</div></div>
+        <div class="card"><h4>活跃规则</h4><div class="kpi" id="kpi-rules">0</div></div>
+        <div class="card"><h4>系统状态</h4><div class="kpi green">正常</div><div class="subkpi">所有服务健康</div></div>
+      </section>
+      <section class="grid">
+        <div class="panel">
+          <div class="ph"><span class="dot"></span> 安全等级分布</div>
+          <div class="pb">
+            <canvas id="chart-donut" height="300"></canvas>
+            <div class="legend">
+              <span><i style="background:#ef4444"></i>一般数据</span>
+              <span><i style="background:#f59e0b"></i>公开数据</span>
+              <span><i style="background:#22c55e"></i>核心数据</span>
+              <span><i style="background:#2563eb"></i>重要数据</span>
+            </div>
+          </div>
         </div>
-        
-        <nav class="nav flex-column p-3">
-            <a class="nav-link active" href="#" onclick="showSection('dashboard')">
-                <i class="fas fa-tachometer-alt me-2"></i>仪表板
-            </a>
-            <a class="nav-link" href="#" onclick="showSection('data-objects')">
-                <i class="fas fa-database me-2"></i>数据对象管理
-            </a>
-            <a class="nav-link" href="#" onclick="showSection('threats')">
-                <i class="fas fa-exclamation-triangle me-2"></i>威胁清单
-            </a>
-            <a class="nav-link" href="#" onclick="showSection('weights')">
-                <i class="fas fa-sliders-h me-2"></i>权重配置
-            </a>
-            <a class="nav-link" href="#" onclick="showSection('rules')">
-                <i class="fas fa-gavel me-2"></i>安全规则
-            </a>
-            <a class="nav-link" href="#" onclick="showSection('events')">
-                <i class="fas fa-history me-2"></i>安全事件
-            </a>
-            <a class="nav-link" href="#" onclick="showSection('batch')">
-                <i class="fas fa-tasks me-2"></i>批量评估
-            </a>
-        </nav>
-    </div>
-    
-    <!-- 主内容区 -->
-    <div class="main-content">
-        <!-- 仪表板 -->
-        <div id="dashboard" class="content-section active">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2><i class="fas fa-tachometer-alt me-2"></i>系统仪表板</h2>
-                <button class="btn btn-outline-primary" onclick="refreshDashboard()">
-                    <i class="fas fa-sync-alt me-1"></i>刷新
-                </button>
-            </div>
-            
-            <!-- 关键指标卡片 -->
-            <div class="row mb-4">
-                <div class="col-md-3">
-                    <div class="metric-card">
-                        <div class="metric-value" id="total-objects">0</div>
-                        <div class="metric-label">数据对象总数</div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="metric-card">
-                        <div class="metric-value" id="total-threats">0</div>
-                        <div class="metric-label">威胁总数</div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="metric-card">
-                        <div class="metric-value" id="total-rules">0</div>
-                        <div class="metric-label">活跃规则</div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="metric-card">
-                        <div class="metric-value text-success" id="system-status">正常</div>
-                        <div class="metric-label">系统状态</div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 图表区域 -->
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>安全等级分布</h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="security-level-chart"></canvas>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>生命周期阶段分布</h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="lifecycle-chart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="row mt-4">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>威胁统计</h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="threat-chart"></canvas>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0"><i class="fas fa-clock me-2"></i>最近安全事件</h5>
-                        </div>
-                        <div class="card-body">
-                            <div id="recent-events-list"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="panel">
+          <div class="ph"><span class="dot"></span> 生命周期阶段分布</div>
+          <div class="pb"><canvas id="chart-phase" height="260"></canvas></div>
         </div>
-        
-        <!-- 数据对象管理 -->
-        <div id="data-objects" class="content-section">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2><i class="fas fa-database me-2"></i>数据对象管理</h2>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addObjectModal">
-                    <i class="fas fa-plus me-1"></i>添加数据对象
-                </button>
-            </div>
-            
-            <div class="card">
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>名称</th>
-                                    <th>数据类型</th>
-                                    <th>生命周期阶段</th>
-                                    <th>安全分值</th>
-                                    <th>安全等级</th>
-                                    <th>更新时间</th>
-                                    <th>操作</th>
-                                </tr>
-                            </thead>
-                            <tbody id="objects-table-body">
-                                <!-- 动态加载 -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+      </section>
+      <section class="grid2">
+        <div class="panel">
+          <div class="ph"><span class="dot"></span> 威胁统计</div>
+          <div class="pb"><canvas id="chart-mix" height="280"></canvas></div>
         </div>
-        
-        <!-- 威胁清单 -->
-        <div id="threats" class="content-section">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2><i class="fas fa-exclamation-triangle me-2"></i>威胁清单管理</h2>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addThreatModal">
-                    <i class="fas fa-plus me-1"></i>添加威胁</button>
-            </div>
-            
-            <div class="row mb-3">
-                <div class="col-md-3">
-                    <select class="form-select" id="threat-stage-filter" onchange="loadThreats()">
-                        <option value="">全部阶段</option>
-                        <option value="采集">采集</option>
-                        <option value="传输">传输</option>
-                        <option value="存储">存储</option>
-                        <option value="共享">共享</option>
-                        <option value="应用">应用</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div id="threats-list">
-                <!-- 动态加载威胁列表 -->
-            </div>
+        <div class="panel">
+          <div class="ph"><span class="dot"></span> 最近安全事件</div>
+          <div class="events" id="event-list"></div>
         </div>
-        
-        <!-- 权重配置 -->
-        <div id="weights" class="content-section">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2><i class="fas fa-sliders-h me-2"></i>权重配置</h2>
-                <button class="btn btn-success" onclick="saveWeights()">
-                    <i class="fas fa-save me-1"></i>保存配置
-                </button>
-            </div>
-            
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">多维安全属性权重设置</h5>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted mb-4">调整各维度在安全分值计算中的权重（总和应为1.0）</p>
-                    
-                    <div id="weights-config">
-                        <!-- 动态加载权重配置 -->
-                    </div>
-                </div>
-            </div>
+      </section>
+    </section>
+
+    <!-- 数据对象管理 -->
+    <section id="view-objects" class="view" style="display:none">
+      <div class="header"><span style="font-size:22px">🗄️</span><h1>数据对象管理</h1>
+        <div class="actions"><button class="btn primary" id="btn-add-obj">＋ 添加数据对象</button></div>
+      </div>
+      <div class="panel">
+        <div class="pb">
+          <table class="table" id="obj-table"></table>
         </div>
-        
-        <!-- 安全规则 -->
-        <div id="rules" class="content-section">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2><i class="fas fa-gavel me-2"></i>安全规则管理</h2>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRuleModal">
-                    <i class="fas fa-plus me-1"></i>添加规则
-                </button>
-            </div>
-            
-            <div id="rules-list">
-                <!-- 动态加载规则列表 -->
-            </div>
+      </div>
+    </section>
+
+    <!-- 威胁清单 -->
+    <section id="view-threats" class="view" style="display:none">
+      <div class="header"><span style="font-size:22px">⚠️</span><h1>威胁清单管理</h1>
+        <div class="actions">
+          <select id="threat-filter" class="btn">
+            <option value="全部阶段">全部阶段</option>
+            <option>采集</option><option>传输</option><option>共享</option><option>存储</option><option>应用</option>
+          </select>
+          <button class="btn primary" id="btn-add-threat">＋ 添加威胁</button>
         </div>
-        
-        <!-- 安全事件 -->
-        <div id="events" class="content-section">
-            <h2 class="mb-4"><i class="fas fa-history me-2"></i>安全事件日志</h2>
-            
-            <div class="card">
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>事件ID</th>
-                                    <th>触发条件</th>
-                                    <th>执行策略</th>
-                                    <th>结果</th>
-                                    <th>事件时间</th>
-                                </tr>
-                            </thead>
-                            <tbody id="events-table-body">
-                                <!-- 动态加载 -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+      </div>
+      <div class="panel">
+        <div class="pb" id="threat-list"></div>
+      </div>
+    </section>
+
+    <!-- 权重配置 -->
+    <section id="view-weights" class="view" style="display:none">
+      <div class="header"><span style="font-size:22px">⚙️</span><h1>权重配置</h1>
+        <div class="actions"><button class="btn primary" id="btn-save-weights">💾 保存配置</button></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><span class="dot"></span> 多维安全属性权重设置（总和=1.0）</div>
+        <div class="pb">
+          <div id="weights-form"></div>
         </div>
-        
-        <!-- 批量评估 -->
-        <div id="batch" class="content-section">
-            <h2 class="mb-4"><i class="fas fa-tasks me-2"></i>批量安全评估</h2>
-            
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">批量数据安全评估</h5>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted">批量上传数据对象进行安全评估</p>
-                    
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6>示例数据格式</h6>
-                            <pre class="bg-light p-3 rounded"><code>[
+      </div>
+    </section>
+
+    <!-- 安全规则 -->
+    <section id="view-rules" class="view" style="display:none">
+      <div class="header"><span style="font-size:22px">📌</span><h1>安全规则管理</h1>
+        <div class="actions"><button class="btn primary" id="btn-add-rule">＋ 添加规则</button></div>
+      </div>
+      <div id="rules-container"></div>
+    </section>
+
+    <!-- 安全事件 -->
+    <section id="view-events" class="view" style="display:none">
+      <div class="header"><span style="font-size:22px">🔄</span><h1>安全事件日志</h1></div>
+      <div class="panel">
+        <div class="pb">
+          <table class="table" id="events-table"></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 批量评估 -->
+    <section id="view-batch" class="view" style="display:none">
+      <div class="header"><span style="font-size:22px">🧪</span><h1>批量安全评估</h1></div>
+      <div class="panel">
+        <div class="ph"><span class="dot"></span> 批量上传数据对象进行安全评估</div>
+        <div class="pb">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div>
+              <div class="badge blue">示例数据格式</div>
+              <textarea class="mono" id="batch-sample">[
   {
     "name": "地理数据A",
     "spatial_scale": 0.8,
@@ -403,96 +234,391 @@
     "data_flow": 0.4,
     "historical_risk": 0.3
   }
-]</code></pre>
-                        </div>
-                        <div class="col-md-6">
-                            <h6>批量评估输入</h6>
-                            <textarea class="form-control" id="batch-data" rows="10" placeholder="请输入JSON格式的数据对象数组"></textarea>
-                            <button class="btn btn-primary mt-3" onclick="performBatchAssessment()">
-                                <i class="fas fa-play me-1"></i>开始评估
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div id="batch-results" class="mt-4"></div>
-                </div>
+]</textarea>
             </div>
-        </div>
-    </div>
-
-    <!-- 模态框 -->
-    <!-- 添加数据对象模态框 -->
-    <div class="modal fade" id="addObjectModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">添加数据对象</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="addObjectForm">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">对象名称</label>
-                                    <input type="text" class="form-control" name="name" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">数据类型</label>
-                                    <select class="form-select" name="data_type" required>
-                                        <option value="">请选择</option>
-                                        <option value="地理数据">地理数据</option>
-                                        <option value="遥感数据">遥感数据</option>
-                                        <option value="矢量数据">矢量数据</option>
-                                        <option value="栅格数据">栅格数据</option>
-                                        <option value="属性数据">属性数据</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">生命周期阶段</label>
-                                    <select class="form-select" name="lifecycle_stage">
-                                        <option value="采集">采集</option>
-                                        <option value="传输">传输</option>
-                                        <option value="存储">存储</option>
-                                        <option value="共享">共享</option>
-                                        <option value="应用">应用</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">空间尺度 (S): <span id="spatial-scale-value">0.5</span></label>
-                                    <input type="range" class="range-input" name="spatial_scale" min="0" max="1" step="0.1" value="0.5" oninput="updateRangeValue(this, 'spatial-scale-value')">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">位置精度 (P): <span id="position-accuracy-value">0.5</span></label>
-                                    <input type="range" class="range-input" name="position_accuracy" min="0" max="1" step="0.1" value="0.5" oninput="updateRangeValue(this, 'position-accuracy-value')">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">内容敏感性 (C): <span id="content-sensitivity-value">0.5</span></label>
-                                    <input type="range" class="range-input" name="content_sensitivity" min="0" max="1" step="0.1" value="0.5" oninput="updateRangeValue(this, 'content-sensitivity-value')">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">数据流通性 (F): <span id="data-flow-value">0.5</span></label>
-                                    <input type="range" class="range-input" name="data_flow" min="0" max="1" step="0.1" value="0.5" oninput="updateRangeValue(this, 'data-flow-value')">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">历史风险 (H): <span id="historical-risk-value">0.5</span></label>
-                                    <input type="range" class="range-input" name="historical_risk" min="0" max="1" step="0.1" value="0.5" oninput="updateRangeValue(this, 'historical-risk-value')">
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-primary" onclick="addDataObject()">添加</button>
-                </div>
+            <div>
+              <div class="badge blue">批量评估输入</div>
+              <textarea class="mono" id="batch-input">[
+  {
+    "name": "地理数据A",
+    "spatial_scale": 0.8,
+    "position_accuracy": 0.6,
+    "content_sensitivity": 0.9,
+    "data_flow": 0.4,
+    "historical_risk": 0.3
+  }
+]</textarea>
+              <div style="margin-top:8px;text-align:right"><button class="btn primary" id="btn-batch">▶ 开始评估</button></div>
             </div>
+          </div>
         </div>
-    </div>
+      </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    <script src="/static/app.js"></script>
+      <div class="panel" style="margin-top:14px">
+        <div class="ph"><span class="dot"></span> 批量评估结果</div>
+        <div class="pb">
+          <table class="table" id="batch-table"></table>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- 通用弹窗 -->
+<div class="mask" id="mask">
+  <div class="dialog">
+    <div class="hd" id="dlg-title">新建</div>
+    <div class="bd">
+      <form id="dlg-form" class="form"></form>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px">
+        <button class="btn" type="button" id="dlg-cancel">取消</button>
+        <button class="btn primary" type="submit" id="dlg-ok">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast">已保存</div>
+
+<script>
+/* -------------------- 工具 -------------------- */
+const toast = (t)=>{const el=document.getElementById('toast'); el.textContent=t; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1500);};
+const nowStr = ()=>new Date().toLocaleString('zh-CN',{hour12:false});
+const levelOf = (score)=> score>=0.8?'核心数据':score>=0.6?'重要数据':score>=0.3?'一般数据':'公开数据';
+const levelBadge = (lv)=> lv==='核心数据'?'green': lv==='重要数据'?'orange': lv==='一般数据'?'red':'blue';
+const phaseBadge = (p)=>({采集:'blue',传输:'purple',共享:'orange',存储:'green',应用:'gray'}[p]||'gray');
+/* -------------------- 伪路由 -------------------- */
+const routes=['dashboard','objects','threats','weights','rules','events','batch'];
+function showView(name){
+  document.querySelectorAll('.view').forEach(v=>v.style.display='none');
+  document.getElementById('view-'+name).style.display='';
+  document.querySelectorAll('.nav a').forEach(a=>a.classList.toggle('active',a.dataset.route===name));
+  location.hash = name;
+  if(name==='dashboard'&&!window._chartsInited){initCharts();window._chartsInited=true;}
+  if(name==='dashboard') syncKpis();
+}
+document.querySelectorAll('.nav a').forEach(a=>a.onclick=()=>showView(a.dataset.route));
+window.addEventListener('load', ()=>showView(routes.includes(location.hash.slice(1))?location.hash.slice(1):'dashboard'));
+
+/* -------------------- 状态数据 -------------------- */
+let weights={ S:.2, P:.2, C:.3, F:.15, H:.15 }; // 总和=1
+let objects=[
+  {id:1,name:'国家重点工程遥感影像数据',type:'遥感影像',phase:'存储',attrs:{S:.7,P:.6,C:.9,F:.2,H:.3},updated:nowStr()},
+  {id:2,name:'省级基础地理信息数据',type:'基础地理信息',phase:'共享',attrs:{S:.5,P:.6,C:.6,F:.5,H:.2},updated:nowStr()},
+  {id:3,name:'市级专题遥感数据',type:'专题地图',phase:'应用',attrs:{S:.3,P:.5,C:.4,F:.6,H:.2},updated:nowStr()},
+  {id:4,name:'县级公开地图数据',type:'公开处理数据',phase:'应用',attrs:{S:.2,P:.3,C:.2,F:.4,H:.1},updated:nowStr()},
+  {id:5,name:'传感器实时监测数据',type:'传感器数据',phase:'传输',attrs:{S:.6,P:.7,C:.8,F:.7,H:.3},updated:nowStr()},
+];
+const scoreOf = (o)=> +(o.attrs.S*weights.S + o.attrs.P*weights.P + o.attrs.C*weights.C + o.attrs.F*weights.F + o.attrs.H*weights.H).toFixed(2);
+let threats=[
+  {id:'T001',name:'非法设备接入',stage:'采集',desc:'未授权设备接入数据采集网络',impact:'数据完整性',risk:.7},
+  {id:'T002',name:'采集过程数据被恶意修改',stage:'采集',desc:'影响数据真实性',impact:'数据真实性',risk:.8},
+  {id:'T003',name:'传感器故障/环境干扰',stage:'采集',desc:'导致数据误差',impact:'数据真实性',risk:.5},
+  {id:'T004',name:'数据包截获',stage:'传输',desc:'传输过程中数据包被截获',impact:'数据保密性',risk:.6},
+  {id:'T005',name:'链路监听',stage:'传输',desc:'网络链路被恶意监听',impact:'数据机密性',risk:.7},
+  {id:'T006',name:'注入攻击',stage:'传输',desc:'异常访问导致污染',impact:'完整性',risk:.8},
+];
+let rules=[
+  {id:'R001',cat:'属性规则',enable:true,prio:1,cond:{type:'score_threshold',threshold:0.8},act:{type:'encryption',level:'high',description:'高级加密存储'}},
+  {id:'R002',cat:'属性规则',enable:true,prio:2,cond:{type:'security_level',level:'核心数据'},act:{type:'access_control',level:'strict',description:'严格访问控制'}},
+  {id:'R003',cat:'行为规则',enable:true,prio:1,cond:{type:'lifecycle_stage',stage:'共享'},act:{type:'audit',level:'full',description:'全程审计记录'}},
+  {id:'R004',cat:'事件触发规则',enable:true,prio:1,cond:{type:'anomaly',kind:'abnormal_access'},act:{type:'mfa',level:'require',description:'启用多因子认证'}}
+];
+let events=[
+  {id:'E002',trigger:'外部安全预警触发',strategy:'限制数据共享、启动审计记录',result:'有效控制数据流通，记录完整操作日志',time:nowStr()},
+  {id:'E003',trigger:'检测到数据多次流转未脱敏',strategy:'强制脱敏处理，限制共享次数',result:'脱敏策略生效，共享次数限制生效',time:nowStr()},
+  {id:'E004',trigger:'存储介质异常检测',strategy:'数据只读锁定，触发安全审计',result:'及时发现并修复存储问题，数据安全得到保障',time:nowStr()},
+  {id:'E005',trigger:'权限配置错误检测',strategy:'重新配置最小访问权限，通知管理员',result:'权限配置已修正，系统安全性得到提升',time:nowStr()},
+  {id:'E001',trigger:'检测到异常访问行为',strategy:'启动多因子认证，提升分级',result:'成功阻止未授权访问，重要数据提升为核心数据',time:nowStr()},
+];
+
+/* -------------------- 仪表板 -------------------- */
+let chartDonut, chartPhase, chartMix;
+function syncKpis(){
+  document.getElementById('kpi-obj').textContent = objects.length;
+  document.getElementById('kpi-threats').textContent = threats.length;
+  document.getElementById('kpi-rules').textContent = rules.filter(r=>r.enable).length;
+  // 分布
+  const counts = { '一般数据':0,'公开数据':0,'核心数据':0,'重要数据':0 };
+  objects.forEach(o=>counts[levelOf(scoreOf(o))]++);
+  chartDonut.data.datasets[0].data = [counts['一般数据'],counts['公开数据'],counts['核心数据'],counts['重要数据']];
+  chartDonut.update();
+
+  const phaseOrder=['采集','传输','共享','存储','应用'];
+  chartPhase.data.labels = phaseOrder;
+  chartPhase.data.datasets[0].data = phaseOrder.map(p=>objects.filter(o=>o.phase===p).length||0);
+  chartPhase.update();
+
+  const perStage = phaseOrder.map(p=> threats.filter(t=>t.stage===p).length );
+  chartMix.data.labels = phaseOrder;
+  chartMix.data.datasets[0].data = perStage;
+  chartMix.data.datasets[1].data = perStage.map(n=> +(1.5 + n*0.2).toFixed(1));
+  chartMix.update();
+
+  // 事件列表
+  const el=document.getElementById('event-list'); el.innerHTML='';
+  events.slice(0,8).forEach(e=>{
+    const d=document.createElement('div'); d.className='evt';
+    d.innerHTML=`<div class="time">${e.time}</div><b>${e.trigger}</b><p>${e.result}</p>`;
+    el.appendChild(d);
+  });
+}
+function initCharts(){
+  chartDonut = new Chart(document.getElementById('chart-donut'),{
+    type:'doughnut',
+    data:{labels:['一般数据','公开数据','核心数据','重要数据'],
+      datasets:[{data:[2,1,1,1],borderWidth:0,cutout:'58%',backgroundColor:['#ef4444','#f59e0b','#22c55e','#2563eb']}]},
+    options:{plugins:{legend:{display:false}}}
+  });
+  chartPhase = new Chart(document.getElementById('chart-phase'),{
+    type:'bar',
+    data:{labels:['采集','传输','共享','存储','应用'],datasets:[{label:'数据对象数量',data:[1,1,1,1,1],borderWidth:0,borderRadius:8,backgroundColor:'rgba(99,125,255,.65)'}]},
+    options:{plugins:{legend:{display:true,labels:{boxWidth:14}}},scales:{y:{beginAtZero:true,grid:{color:'#eef2ff'}}}}
+  });
+  chartMix = new Chart(document.getElementById('chart-mix'),{
+    data:{labels:['采集','传输','共享','存储','应用'],datasets:[
+      {type:'bar',label:'威胁数量',data:[3,2,1,2,1],borderWidth:0,borderRadius:6,backgroundColor:'rgba(244,114,182,.45)'},
+      {type:'line',label:'平均风险等级',data:[2.1,2.3,1.9,2.0,1.8],tension:.35,pointRadius:3,borderWidth:2,borderColor:'#f59e0b',fill:false}
+    ]},
+    options:{scales:{y:{beginAtZero:true,grid:{color:'#f1f5f9'}}}}
+  });
+  syncKpis();
+}
+document.getElementById('btn-refresh').onclick=()=>{toast('已刷新'); syncKpis();}
+
+/* -------------------- 数据对象管理 -------------------- */
+function renderObjects(){
+  const tbl=document.getElementById('obj-table');
+  tbl.innerHTML=`
+    <thead><tr>
+      <th>名称</th><th>数据类型</th><th>生命周期阶段</th><th style="width:28%">安全分值</th>
+      <th>安全等级</th><th>更新时间</th><th class="right">操作</th>
+    </tr></thead>
+    <tbody>
+      ${objects.map(o=>{
+        const s=scoreOf(o), lv=levelOf(s);
+        return `<tr>
+          <td>${o.name}</td>
+          <td class="muted">${o.type}</td>
+          <td><span class="badge ${phaseBadge(o.phase)}">${o.phase}</span></td>
+          <td>
+            <div class="progress"><div class="bar" style="width:${Math.round(s*100)}%"></div></div>
+            <div class="muted">${s.toFixed(2)}</div>
+          </td>
+          <td><span class="badge ${levelBadge(lv)}">${lv}</span></td>
+          <td class="muted">${o.updated}</td>
+          <td class="right">
+            <button class="btn" onclick="openObj(${o.id})">✏️</button>
+            <button class="btn danger" onclick="delObj(${o.id})">🗑</button>
+          </td>
+        </tr>`}).join('')}
+    </tbody>`;
+  syncKpis();
+}
+function openObj(id){
+  const isEdit=!!id; const row=isEdit?objects.find(x=>x.id===id):{name:'',type:'',phase:'采集',attrs:{S:.2,P:.2,C:.2,F:.2,H:.2}};
+  showDialog(isEdit?'编辑数据对象':'新增数据对象',[
+    ['text','name','名称*',row.name,'如：国家重点工程遥感影像数据'],
+    ['text','type','数据类型*',row.type,'如：遥感影像'],
+    ['select','phase','生命周期阶段*',row.phase,['采集','传输','共享','存储','应用']],
+    ['hr'],
+    ['number','S','空间尺度(S)',row.attrs.S],['number','P','位置精度(P)',row.attrs.P],
+    ['number','C','内容敏感性(C)',row.attrs.C],['number','F','数据流通性(F)',row.attrs.F],['number','H','历史风险(H)',row.attrs.H],
+  ], (vals)=>{
+    const attrs={S:+vals.S,P:+vals.P,C:+vals.C,F:+vals.F,H:+vals.H};
+    if(isEdit){ Object.assign(row,{name:vals.name,type:vals.type,phase:vals.phase,attrs,updated:nowStr()}); }
+    else{ objects.unshift({id:Date.now(),name:vals.name,type:vals.type,phase:vals.phase,attrs,updated:nowStr()}); }
+    renderObjects(); toast('已保存');
+  });
+}
+function delObj(id){ if(confirm('确认删除该对象？')){ objects=objects.filter(x=>x.id!==id); renderObjects(); toast('已删除'); } }
+document.getElementById('btn-add-obj').onclick=()=>openObj();
+
+/* -------------------- 威胁清单 -------------------- */
+function renderThreats(){
+  const ph = document.getElementById('threat-filter').value;
+  const list = (ph==='全部阶段'?threats:threats.filter(t=>t.stage===ph));
+  const wrap=document.getElementById('threat-list'); wrap.innerHTML='';
+  list.forEach(t=>{
+    const item=document.createElement('div');
+    item.style.borderLeft='3px solid #f87171'; item.style.padding='12px 8px'; item.style.marginBottom='8px'; item.style.display='grid';
+    item.style.gridTemplateColumns='1fr 120px'; item.style.gap='8px';
+    item.innerHTML=`
+      <div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <b>${t.name}</b><span class="badge blue">${t.stage}</span><span class="badge gray mono">${t.id}</span>
+        </div>
+        <div class="muted">${t.desc}</div>
+        <div class="muted">影响范围：<b>${t.impact}</b></div>
+      </div>
+      <div class="right">
+        <div class="muted">风险等级</div>
+        <div style="color:#b91c1c;font-weight:800">${t.risk.toFixed(1)}</div>
+        <div style="margin-top:6px">
+          <button class="btn" onclick="openThreat('${t.id}')">✏️</button>
+          <button class="btn danger" onclick="delThreat('${t.id}')">🗑</button>
+        </div>
+      </div>`;
+    wrap.appendChild(item);
+  });
+  syncKpis();
+}
+document.getElementById('threat-filter').onchange=renderThreats;
+function openThreat(id){
+  const isEdit=!!id; const row=isEdit?threats.find(x=>x.id===id):{id:'T'+String(Math.random()).slice(2,5),name:'',stage:'采集',desc:'',impact:'',risk:.5};
+  showDialog(isEdit?'编辑威胁':'新增威胁',[
+    ['text','id','编号',row.id],['text','name','名称*',row.name],['select','stage','阶段*',row.stage,['采集','传输','共享','存储','应用']],
+    ['text','impact','影响维度',row.impact],['number','risk','风险(0~1)',row.risk],['textarea','desc','描述',row.desc]
+  ], (v)=>{
+    if(isEdit){ Object.assign(row,{name:v.name,stage:v.stage,impact:v.impact,risk:+v.risk,desc:v.desc}); }
+    else{ threats.unshift({id:v.id,name:v.name,stage:v.stage,impact:v.impact,risk:+v.risk,desc:v.desc}); }
+    renderThreats(); toast('已保存');
+  });
+}
+function delThreat(id){ if(confirm('确认删除该威胁？')){ threats = threats.filter(x=>x.id!==id); renderThreats(); toast('已删除'); } }
+document.getElementById('btn-add-threat').onclick=()=>openThreat();
+
+/* -------------------- 权重配置 -------------------- */
+function renderWeights(){
+  const host=document.getElementById('weights-form'); host.innerHTML='';
+  const fields=[['S','空间尺度 (S)'],['P','位置精度 (P)'],['C','内容敏感性 (C)'],['F','数据流通性 (F)'],['H','历史风险 (H)']];
+  fields.forEach(([k,label])=>{
+    const row=document.createElement('div'); row.style.display='grid'; row.style.gridTemplateColumns='1fr 80px 60px'; row.style.gap='10px'; row.style.alignItems='center'; row.style.margin='14px 0';
+    row.innerHTML=`<div><b>${label}</b><div class="muted">${label.replace(/[（(].*/, '')}归一化</div></div>
+      <input type="range" min="0" max="1" step="0.01" value="${weights[k]}" id="w-${k}">
+      <input type="number" min="0" max="1" step="0.01" value="${weights[k]}" id="n-${k}">`;
+    host.appendChild(row);
+    const rng=row.querySelector(`#w-${k}`), num=row.querySelector(`#n-${k}`);
+    const sync=(val)=>{ rng.value=num.value=val; };
+    rng.oninput=()=>{ num.value=rng.value; clampTotal(); };
+    num.oninput=()=>{ sync(num.value); clampTotal(); };
+  });
+  const tip=document.createElement('div'); tip.className='muted'; tip.id='w-tip'; host.appendChild(tip);
+  updateWeightTip();
+}
+function totalWeight(){ return +(weights.S+weights.P+weights.C+weights.F+weights.H).toFixed(2); }
+function readWeights(){ ['S','P','C','F','H'].forEach(k=>weights[k]=+document.getElementById('w-'+k).value); }
+function clampTotal(){
+  readWeights();
+  const sum=totalWeight();
+  // 自动把 H 调整到 1.0
+  const rest = +(1 - (weights.S+weights.P+weights.C+weights.F)).toFixed(2);
+  weights.H = Math.max(0, Math.min(1, rest));
+  document.getElementById('w-H').value = document.getElementById('n-H').value = weights.H;
+  updateWeightTip();
+}
+function updateWeightTip(){ document.getElementById('w-tip').textContent = `当前总和：${totalWeight().toFixed(2)}（目标=1.00）`; }
+document.getElementById('btn-save-weights').onclick=()=>{ clampTotal(); renderObjects(); toast('权重已保存并重新计算分值'); };
+
+/* -------------------- 规则 -------------------- */
+function renderRules(){
+  const box=document.getElementById('rules-container'); box.innerHTML='';
+  rules.forEach(r=>{
+    const panel=document.createElement('div'); panel.className='panel'; panel.style.margin='0 0 12px 0';
+    panel.innerHTML=`
+      <div style="display:flex;align-items:center;gap:10px;padding:16px 16px 0 16px">
+        <h3 style="margin:0">${r.id}</h3>
+        <span class="badge gray">${r.cat}</span>
+        <span class="badge ${r.enable?'green':'red'}">${r.enable?'启用':'停用'}</span>
+        <div class="actions" style="margin-left:auto">
+          <button class="btn" onclick="toggleRule('${r.id}')">${r.enable?'禁用':'启用'}</button>
+          <button class="btn" onclick="editRule('${r.id}')">✏️ 编辑</button>
+          <button class="btn danger" onclick="delRule('${r.id}')">🗑 删除</button>
+        </div>
+      </div>
+      <div class="pb" style="display:grid;grid-template-columns:1fr 1fr 120px;gap:12px">
+        <pre class="mono" style="background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:12px;margin:0">条件:\n${JSON.stringify(r.cond,null,2)}</pre>
+        <pre class="mono" style="background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:12px;margin:0">动作:\n${JSON.stringify(r.act,null,2)}</pre>
+        <div class="right">优先级<br><b style="font-size:20px">${r.prio}</b></div>
+      </div>`;
+    box.appendChild(panel);
+  });
+  syncKpis();
+}
+function toggleRule(id){ const r=rules.find(x=>x.id===id); r.enable=!r.enable; renderRules(); toast(r.enable?'已启用':'已停用'); }
+function editRule(id){
+  const isEdit=!!id; const r=isEdit?rules.find(x=>x.id===id):{id:'R'+String(Math.random()).slice(2,5),cat:'属性规则',enable:true,prio:1,cond:{},act:{}};
+  showDialog(isEdit?'编辑规则':'新增规则',[
+    ['text','id','ID',r.id],['text','cat','类别',r.cat],['number','prio','优先级',r.prio],
+    ['textarea','cond','条件(JSON)',JSON.stringify(r.cond,null,2)],
+    ['textarea','act','动作(JSON)',JSON.stringify(r.act,null,2)]
+  ], (v)=>{
+    try{
+      const cond=JSON.parse(v.cond||'{}'), act=JSON.parse(v.act||'{}');
+      if(isEdit){ Object.assign(r,{id:v.id,cat:v.cat,prio:+v.prio,cond,act}); }
+      else{ rules.unshift({id:v.id,cat:v.cat,enable:true,prio:+v.prio,cond,act}); }
+      renderRules(); toast('已保存');
+    }catch(err){ toast('JSON 解析失败'); }
+  });
+}
+function delRule(id){ if(confirm('确认删除该规则？')){ rules = rules.filter(x=>x.id!==id); renderRules(); toast('已删除'); } }
+document.getElementById('btn-add-rule').onclick=()=>editRule();
+
+/* -------------------- 事件日志 -------------------- */
+function renderEvents(){
+  const tbl=document.getElementById('events-table');
+  tbl.innerHTML=`<thead><tr><th>事件ID</th><th>触发条件</th><th>执行策略</th><th>结果</th><th>事件时间</th></tr></thead>
+  <tbody>${events.map(e=>`
+    <tr>
+      <td class="mono" style="color:#ef4444">${e.id}</td>
+      <td>${e.trigger}</td><td>${e.strategy}</td><td><span class="badge green">${e.result}</span></td>
+      <td class="muted">${e.time}</td>
+    </tr>`).join('')}</tbody>`;
+}
+
+/* -------------------- 批量评估 -------------------- */
+function runBatch(jsonText){
+  try{
+    const arr=JSON.parse(jsonText||'[]'); if(!Array.isArray(arr)) throw new Error();
+    const res=arr.map(x=>{
+      const s=+( (x.spatial_scale||0)*weights.S + (x.position_accuracy||0)*weights.P + (x.content_sensitivity||0)*weights.C + (x.data_flow||0)*weights.F + (x.historical_risk||0)*weights.H ).toFixed(2);
+      return {name:x.name||'-',score:s,level:levelOf(s)};
+    });
+    const tbl=document.getElementById('batch-table');
+    tbl.innerHTML=`<thead><tr><th>对象名称</th><th style="width:40%">安全分值</th><th>安全等级</th></tr></thead>
+      <tbody>${res.map(r=>`
+        <tr>
+          <td>${r.name}</td>
+          <td><div class="progress"><div class="bar" style="width:${Math.round(r.score*100)}%"></div></div><div class="muted">${r.score.toFixed(2)}</div></td>
+          <td><span class="badge ${levelBadge(r.level)}">${r.level}</span></td>
+        </tr>`).join('')}
+      </tbody>`;
+    toast('评估完成');
+  }catch(e){ toast('JSON 格式错误'); }
+}
+document.getElementById('btn-batch').onclick=()=>runBatch(document.getElementById('batch-input').value);
+
+/* -------------------- 通用弹窗 -------------------- */
+const mask=document.getElementById('mask'), dlgForm=document.getElementById('dlg-form'), dlgTitle=document.getElementById('dlg-title');
+let dlgCb=null;
+function showDialog(title, schema, onSubmit){
+  dlgTitle.textContent=title; dlgForm.innerHTML=''; dlgCb=onSubmit;
+  schema.forEach(row=>{
+    const [type,key,label,value,extra]=row;
+    if(type==='hr'){ const hr=document.createElement('div'); hr.style.gridColumn='1 / -1'; hr.innerHTML='<hr style="border:none;border-top:1px dashed #e5e7eb">'; dlgForm.appendChild(hr); return;}
+    const L=document.createElement('label'); L.setAttribute('for',key); L.textContent=label; dlgForm.appendChild(L);
+    let input;
+    if(type==='textarea'){ input=document.createElement('textarea'); input.id=key; input.value=value||''; }
+    else if(type==='select'){ input=document.createElement('select'); input.id=key; (extra||[]).forEach(opt=>{const o=document.createElement('option'); o.value=o.textContent=opt; if(value===opt) o.selected=true; input.appendChild(o)}); }
+    else{ input=document.createElement('input'); input.id=key; input.type=type; input.value=value??''; if(type==='number'){ input.step='0.01'; input.min='0'; input.max='1'; } }
+    dlgForm.appendChild(input);
+  });
+  mask.style.display='flex';
+}
+function closeDialog(){ mask.style.display='none'; dlgCb=null; }
+document.getElementById('dlg-cancel').onclick=closeDialog;
+document.getElementById('mask').addEventListener('click',e=>{ if(e.target.id==='mask') closeDialog(); });
+document.getElementById('dlg-form').addEventListener('submit',e=>{
+  e.preventDefault(); if(!dlgCb) return;
+  const vals={}; [...dlgForm.elements].forEach(el=>{ if(el.id) vals[el.id]=el.value; });
+  closeDialog(); dlgCb(vals);
+});
+
+/* -------------------- 初始化渲染 -------------------- */
+function boot(){
+  renderObjects(); renderThreats(); renderWeights(); renderRules(); renderEvents(); runBatch(document.getElementById('batch-input').value);
+  if(!window._chartsInited){ initCharts(); window._chartsInited=true; }
+}
+window.addEventListener('load', boot);
+</script>
 </body>
 </html>
